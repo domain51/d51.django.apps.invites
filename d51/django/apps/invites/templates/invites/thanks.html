@@ -1,0 +1,11 @@
+{% extends "invites/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<h2>{% trans "Thanks!" %}</h2>
+
+<p>
+    Thanks for inviting {{ number_of_invites }}
+    {% ifequal number_of_invites 1 %}person{% else %}people{% endifequal %}
+</p>
+{% endblock %}

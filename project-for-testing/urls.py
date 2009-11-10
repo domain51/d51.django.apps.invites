@@ -8,6 +8,7 @@ handler500 # Pyflakes
 
 urlpatterns = patterns(
     '',
+    (r'^invites/', include('d51.django.apps.invites.urls')),
     (r'^admin/(.*)', admin.site.root),
     (r'^accounts/login/$', 'django.contrib.auth.views.login'),
 )
