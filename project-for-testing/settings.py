@@ -46,11 +46,12 @@ ROOT_URLCONF = 'project.urls'
 
 
 INSTALLED_APPS = (
+    'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
-    'd51.django.apps.invites',
+    'd51.django.apps.invites.email',
 )
 
 TEMPLATE_LOADERS = (
@@ -62,4 +63,4 @@ TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), "templates"),
 )
 
-
+SITE_ID=1

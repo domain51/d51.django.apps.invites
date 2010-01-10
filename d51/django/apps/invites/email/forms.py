@@ -1,5 +1,5 @@
 from django import forms
-from d51.django.apps.invites.fields import MultiEmailField
+from .fields import MultiEmailField
 
 email_attrs = {
     'class': 'required',

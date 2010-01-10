@@ -1,6 +1,6 @@
 from django.forms.util import ValidationError
 from django.test import TestCase
-from d51.django.apps.invites.fields import MultiEmailField
+from ..fields import MultiEmailField
 
 class MultiEmailFieldTest(TestCase):
     def test_allows_multiple_emails(self):

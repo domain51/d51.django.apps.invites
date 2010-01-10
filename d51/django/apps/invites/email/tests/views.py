@@ -2,7 +2,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
-from d51.django.apps.invites.views import index, thanks
+from ..views import index, thanks
 
 class IndexViewTests(TestCase):
     def test_renders_invites_index_html_on_GET(self):

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from d51.django.apps.invites.forms import InvitationForm
+from ..forms import InvitationForm
 
 class InvitationFormTests(TestCase):
     def test_allows_multiple_emails_in_to_field(self):
