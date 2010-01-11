@@ -3,12 +3,12 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
-from .forms import InvitationForm
+from .forms import EmailInvitationForm
 
 
 def index(request):
     if request.method == "POST":
-        form = InvitationForm(request.POST)
+        form = EmailInvitationForm(request.POST)
         if form.is_valid():
             to_emails = form.cleaned_data['to_email']
             # TODO: handle error cases
@@ -20,7 +20,7 @@ def index(request):
             )
             return redirect(reverse('invites_thanks') + '?num=%d' % len(to_emails))
     else:
-        form = InvitationForm()
+        form = EmailInvitationForm()
 
     return render_to_response(
         'invites/index.html',

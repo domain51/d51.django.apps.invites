@@ -1,12 +1,13 @@
-from django import forms
+from ..forms import InvitationForm
 from .fields import MultiEmailField
+from django import forms
 
 email_attrs = {
     'class': 'required',
     'max_length': 100,
 }
 
-class InvitationForm(forms.Form):
+class EmailInvitationForm(InvitationForm):
     """
     Form for sending invitations
     """
