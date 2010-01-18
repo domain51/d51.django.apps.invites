@@ -74,7 +74,7 @@ class InviteBackend(object):
             try:
                 invitations = self.send_invites(invitations, form)
                 request.session[SENT_INVITATIONS] = invitations
-                return HttpResponseRedirect(reverse('invites:invite-%s-confirm'%self.backend_name))
+                return HttpResponseRedirect(reverse('invites:invite-%s-confirm' % self.backend_name))
             except InviteBackendException as e:
                 context['error'] = e
         return render_to_response([
