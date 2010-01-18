@@ -58,7 +58,7 @@ class InviteBackend(object):
                 'invitations':invitations,
             }, context_instance=RequestContext(request))
 
-    def accept_invite(self, request, invitation):
+    def accept_invite_view(self, request, invitation):
         if request.user.is_authenticated():
             self.model_class.objects.accept_invite(invitation, request.user)
             return HttpResponseRedirect(request.GET.get('next', '/'))
