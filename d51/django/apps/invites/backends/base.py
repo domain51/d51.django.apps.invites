@@ -52,8 +52,8 @@ class InviteBackend(object):
     def confirmation_view(self, request):
         invitations = request.session[SENT_INVITATIONS]
         return render_to_response([
-            'invites/%s/confirmation_form.html'%self.backend_name,
-            'invites/confirmation_form.html',
+            'invites/%s/confirmation.html'%self.backend_name,
+            'invites/confirmation.html',
             ], {
                 'invitations':invitations,
             }, context_instance=RequestContext(request))
