@@ -71,7 +71,8 @@ class EmailInviteBackend(InviteBackend):
                 message_template.render(context),
                 request.user.email,
                 (invitation.target, )
-            ) 
+            )
+        return invitations
 
     def accept_invite(self, request, invitation):
         if request.user.is_authenticated():

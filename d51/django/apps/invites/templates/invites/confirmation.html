@@ -1,14 +1,12 @@
 {% extends "invites/base.html" %}
 
 {% block invites_content %}
-    <ul>
-    {% for i in invitations %}
-        <li>{{ i }}</li>
-    {% endfor %}
-    </ul>
 
-    <form method="POST" action=".">
-        {{ form.as_p }}
-        <input type="submit" value="submit" />
-    </form>
+<h3>Thanks!</h3>
+
+<p>
+    We've processed the {{ invitations|length }} invitation{{ invitations|pluralize }}
+    you sent.  Thanks again!
+</p>
+
 {% endblock %}
