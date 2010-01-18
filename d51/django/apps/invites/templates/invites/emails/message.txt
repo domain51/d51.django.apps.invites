@@ -1,0 +1,8 @@
+Hello!
+
+Your friend, {{ user.get_full_name }}, has invited you to join our
+site.  Please check it out:
+
+    {{ invitation.get_absolute_url }}
+
+Thanks!

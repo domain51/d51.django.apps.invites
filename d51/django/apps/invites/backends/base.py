@@ -72,7 +72,7 @@ class InviteBackend(object):
         if form.is_valid() and request.method == 'POST':
             invitations = self.create_invitations_from_form(request.user, form)
             try:
-                invitations = self.send_invites(invitations, form)
+                invitations = self.send_invites(invitations, form, request)
                 request.session[SENT_INVITATIONS] = invitations
                 return HttpResponseRedirect(reverse('invites:invite-%s-confirm' % self.backend_name))
             except InviteBackendException as e:

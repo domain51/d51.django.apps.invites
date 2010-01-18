@@ -1,8 +1,9 @@
-from django import forms
+from django import forms, template
 from django.forms.fields import EmailField
 from .base import InviteBackend
 from ..sites import invite_site
 from django.core.mail import send_mail
+
 class ConsoleInviteBackend(InviteBackend):
     def get_form_class(self):
         class form_class(forms.Form):
@@ -36,7 +37,6 @@ class EmailInvitationForm(forms.Form):
     """
     Form for sending invitations
     """
-    from_email = forms.EmailField(widget=forms.TextInput(attrs=email_attrs))
     to_email = MultiEmailField(widget=forms.TextInput(attrs=email_attrs))
 
     personal_note = forms.CharField(
@@ -52,9 +52,24 @@ class EmailInviteBackend(InviteBackend):
     def get_form_class(self):
         return EmailInvitationForm
 
-    def send_invites(self, invitations, form):
-        emails = [invitation.target for invitation in invitations]
-        send_mail('Subject', 'Our Message', form.cleaned_data['from_email'], emails) 
+    # TODO: This should be a view...
+    # TODO: This is too abstracted, has form been validated?  This all needs to
+    #       happen in the same code
+    # TODO: These need to be queued up in RabbitMQ
+    def send_invites(self, invitations, form, request):
+        for invitation in invitations:
+            context = template.Context({
+                'invitation': invitation,
+                'note': form.cleaned_data['personal_note'],
+            })
+            subject_template = template.loader.get_template('invites/emails/subject.txt')
+            message_template = template.loader.get_template('invites/emails/message.txt')
+            send_mail(
+                subject_template.render(context).strip(),
+                message_template.render(context),
+                request.user.email,
+                (invitation.target, )
+            ) 
 
     def accept_invite(self, request, invitation):
         if request.user.is_authenticated():
