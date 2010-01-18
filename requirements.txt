@@ -1,0 +1,4 @@
+Django
+South
+-e git://github.com/domain51/d51.django.auth#egg=d51.django.auth
+-e git://github.com/tswicegood/httplib2-oauth#egg=oauthclient

@@ -1,20 +1,21 @@
-from fabric.api import *
-import os
-
-def init():
-    if not os.path.exists("./downloads"):
-        local("mkdir ./downloads")
-    local("python bootstrap.py")
-    local("bin/buildout")
-
-def setup_tests():
-    if os.path.exists("./project-for-testing"):
-        local("mv ./project-for-testing ./project")
-
-def teardown_tests():
-    local("mv ./project ./project-for-testing")
+from fabric.api import local
 
 def test():
-    setup_tests()
-    local("bin/django test invites")
-    teardown_tests()
+    """
+    Run tests for d51.django.apps.schedules
+    """
+    local("python ./run_tests.py")
+
+def init():
+    """
+    Initialize a virtualenv in which to run tests against this
+    """
+    local("virtualenv .")
+    local("pip install -E . -r requirements.txt")
+
+def clean():
+    """
+    Remove the cruft created by virtualenv and pip
+    """
+    local("rm -rf bin/ include/ lib/")
+
