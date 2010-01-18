@@ -62,7 +62,8 @@ class InviteBackend(object):
         if request.user.is_authenticated():
             self.model_class.objects.accept_invite(invitation, request.user)
             return HttpResponseRedirect(request.GET.get('next', '/'))
-        return HttpResponse()
+        else:
+            raise Exception('not yet implemented')
 
     def invite_view(self, request):
         form_class = self.get_form_class()
