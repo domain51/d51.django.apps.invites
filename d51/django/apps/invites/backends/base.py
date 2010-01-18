@@ -18,8 +18,12 @@ class InviteBackend(object):
     
     def get_urls(self):
         urlpatterns = patterns('',
-            url('^%s/confirm/$'%self.backend_name, auth_required()(self.confirmation_view), name='invite-%s-confirm'%self.backend_name),
-            url('^%s/$'%self.backend_name, auth_required()(self.invite_view), name='invite-%s'%self.backend_name),
+            url(r'^%s/confirm/$' % self.backend_name,
+                auth_required()(self.confirmation_view),
+                name='invite-%s-confirm' % self.backend_name),
+            url(r'^%s/$'%self.backend_name,
+                auth_required()(self.invite_view),
+                name='invite-%s' % self.backend_name),
         )
         return urlpatterns
 
