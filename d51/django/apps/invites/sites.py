@@ -49,18 +49,6 @@ class InviteBackendSite(object):
         invite = get_object_or_404(self.model_class, pk=int(invite_pk))
         backend = invite.get_backend()
         return backend.accept_invite_view(request, invite)
-        if request.user.is_authenticated():
-            response = backend.accept_invite(request, invite)
-        else:
-            
-            request.session[INVITE_SESSION_KEY] = invite_pk
-            response = render_to_response([
-                    'invites/%s/accept.html'%backend.backend_name,
-                    'invites/accept.html',
-            ],{
-                                'invitation':invite,
-            }, context_instance=RequestContext(request))
-        return response
 
     def load_backend_for(self, invitation):
         try:
