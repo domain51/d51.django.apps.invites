@@ -1,0 +1,7 @@
+{% comment %}
+Override this file inside your own project to provide any additional settings
+that you might need.  Please see the [facebook wiki][] for a full list of
+available attributes.
+
+[facebook wiki]: http://wiki.developers.facebook.com/index.php/Fb:request-form
+{% endcomment %}
