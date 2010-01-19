@@ -67,9 +67,12 @@ class InviteBackend(object):
 
     def invite_view(self, request):
         form_class = self.get_form_class()
-        form = form_class(request.POST) if request.method == 'POST' else form_class()
+        if form_class:
+            form = form_class(request.POST) if request.method == 'POST' else form_class()
+        else:
+            form = False
         context = { 'form': form }
-        if form.is_valid() and request.method == 'POST':
+        if form and form.is_valid() and request.method == 'POST':
             invitations = self.create_invitations_from_form(request.user, form)
             try:
                 invitations = self.send_invites(invitations, form, request)
