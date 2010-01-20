@@ -1,0 +1,16 @@
+{% extends "invites/base.html" %}
+
+{% block content %}
+
+How's it going?
+
+<fb:serverfbml style="width: 755px;">
+    <script type="text/fbml">
+        <fb:fbml>
+            {% include "invites/facebook/request-form.html" %}
+        </fb:fbml>
+    </script>
+</fb:serverfbml>
+
+
+{% endblock %}
