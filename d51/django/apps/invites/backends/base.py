@@ -80,7 +80,7 @@ class InviteBackend(object):
 
     def can_handle_create_for(request, with_form=None):
         form = with_form
-        return form and form.is_valid() and request.method == 'POST':
+        return form and form.is_valid() and request.method == 'POST'
 
     def handle_create_for(request, with_form, and_context):
         form, context = with_form, and_context
