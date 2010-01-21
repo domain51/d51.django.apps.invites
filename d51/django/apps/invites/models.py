@@ -5,13 +5,8 @@ from django.template.defaultfilters import slugify
 
 class InvitationManager(models.Manager):
     def confirm(self, invitation, user):
-        existing_fulfillments = invitation.fulfillments.filter(user=user, invitation=invitation)
-        if not existing_fulfillments:
-            return InvitationFulfillment.objects.create(
-                user=user,
-                invitation=invitation,
-            )
-        return None
+        """ deprecated: see Invitation.fulfill """
+        return self.invitation.fulfill(user)
 
     def create_for(self, backend_string, user, with_form):
         return [self.create(**{
