@@ -1,9 +1,0 @@
-{% load i18n %}
-<form action="{% url invites_index %}" method="POST">
-    {{ invitation_form.as_p }}
-
-    <div class="controls">
-        <input type="submit" value="{% trans 'Send Invitation' %}" />
-    </div>
-</form>
-
