@@ -4,9 +4,20 @@ from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
 class InvitationManager(models.Manager):
-    def fulfill(self, invitation, user):
+<<<<<<< HEAD
+    def confirm(self, invitation, user):
         """ deprecated: see Invitation.fulfill """
         return self.invitation.fulfill(user)
+=======
+    def fulfill(self, invitation, user):
+        existing_fulfillments = invitation.fulfillments.filter(user=user, invitation=invitation)
+        if not existing_fulfillments:
+            return InvitationFulfillment.objects.create(
+                user=user,
+                invitation=invitation,
+            )
+        return None
+>>>>>>> chrisdickinson/master
 
     def create_for(self, backend_string, user, with_form):
         return [self.create(**{

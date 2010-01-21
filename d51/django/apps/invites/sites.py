@@ -15,12 +15,7 @@ class InviteBackendSite(object):
         self.home_view_name = home_view_name
 
     def get_urls(self):
-        urlpatterns = patterns('',
-            url('^$', auth_required()(self.root_view), name='invite-root'),
-            url('^thanks/$', auth_required()(self.thanks_view), name='invite-thanks'),
-            url('^from/(?P<username>[\w\d\-_]+)/(?P<invite_pk>\d+)/$', self.accept_invite_view, name='invite-accept'),
-            url('^confirm/$', self.confirm_invite_view, name='invite-confirm'),
-        )
+        urlpatterns = patterns('')
         for backend in self._invitation_registration.values():
             urlpatterns += backend.get_urls()
         return urlpatterns 
@@ -32,47 +27,6 @@ class InviteBackendSite(object):
     def register_backend(self, name, backend_class):
         self._invitation_registration[name] = backend_class(name, self)
     
-    def root_view(self, request):
-        """
-            a basic list of all available invitation backends
-        """
-        return render_to_response('invites/index.html', { 'registration_backends':self._invitation_registration }, context_instance=RequestContext(request)) 
-
-    def thanks_view(self, request):
-        """
-            this view is presented to the inviter after 
-            sending his or her invitations
-        """
-        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
-        template_list = [ 
-                'invites/thanks.html',
-        ]
-        if invite_pk is not None:
-            invitation = self.model_class.objects.get(pk=int(pk))
-            backend = invitation.get_backend()
-            template_list.insert(0, 'invites/%s/thanks.html' % backend.backend_name)
-
-        return render_to_response(template_list, {}, context_instance=RequestContext(request))
-
-    def accept_invite_view(self, request, username, invite_pk):
-        """
-            user hits this page from an invitation link, should be redirected
-            to the appropriate registration method
-        """
-        invite = get_object_or_404(self.model_class, pk=int(invite_pk))
-        backend = invite.get_backend()
-        return backend.accept_invite_view(request, invite)
-
-    def confirm_invite_view(self, request):
-        """
-            after registering, a user should pass through this
-            view to actually generate a confirmed InvitationFulfillment
-        """
-        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
-        invite = get_object_or_404(self.model_class, pk=int(invite_pk))
-        backend = invite.get_backend()
-        return backend.confirm_invite_view(request, invite)
-
     def load_backend_for(self, invitation):
         try:
             return self._invitation_registration[invitation.backend]
