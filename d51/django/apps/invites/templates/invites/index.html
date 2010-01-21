@@ -1,7 +1,0 @@
-{% extends "invites/base.html" %}
-
-{% block invites_content %}
-    {% for name, backend in registration_backends.iteritems %}
-        <a href="{{ backend.get_absolute_url }}" title="{{ name }}">{{ name }}</a>
-    {% endfor %}
-{% endblock %}

@@ -17,13 +17,24 @@ class InviteBackend(object):
         return None
     
     def get_urls(self):
+        # invitee's
         urlpatterns = patterns('',
-            url(r'^%s/confirm/$' % self.backend_name,
-                auth_required()(self.confirmation_view),
-                name='invite-%s-confirm' % self.backend_name),
+            url('^%s/from/(?P<username>[\w\d\-_]+)/(?P<invite_pk>\d+)/$' % self.backend_name, 
+                self.accept_view,
+                name='invite-%s-accept'%self.backend_name),
+            url('^%s/fulfill/$' % self.backend_name,
+                self.fulfill_view,
+                name='invite-%s-fulfill'%self.backend_name),
+        )
+
+        # inviter's
+        urlpatterns += patterns('',
+            url(r'^%s/processed/$' % self.backend_name,
+                auth_required()(self.processed_view),
+                name='invite-%s-processed' % self.backend_name),
             url(r'^%s/$'%self.backend_name,
-                auth_required()(self.invite_view),
-                name='invite-%s' % self.backend_name),
+                auth_required()(self.create_view),
+                name='invite-%s-create' % self.backend_name),
         )
         return urlpatterns
 
@@ -31,16 +42,13 @@ class InviteBackend(object):
         return self._site.app_name
  
     def get_absolute_url(self):
-        return reverse(self.get_url_namespace() + ':invite-%s'%self.backend_name)
+        return reverse(self.get_url_namespace() + ':invite-%s-create'%self.backend_name)
 
     def create_invitations_from_form(self, user, form):
         return self.model_class.objects.create_for(self.backend_name, user, with_form=form)
 
     def send_invites(self, invitations, form):
         return invitations 
-
-    def message_user(self, user, message):
-        pass
 
     def get_registration_url(self):
         return reverse('registration_register')
@@ -53,33 +61,7 @@ class InviteBackend(object):
         return self._site.home_view_name
     home_view_name = property(home_view_name)
 
-    def revoke_invitations(self, invitations):
-        [invitation.delete() for invitation in invitations]
-
-    def confirmation_view(self, request):
-        invitations = request.session[SENT_INVITATIONS]
-        return render_to_response([
-            'invites/%s/confirmation.html'%self.backend_name,
-            'invites/confirmation.html',
-            ], {
-                'invitations':invitations,
-            }, context_instance=RequestContext(request))
-
-    def accept_invite_view(self, request, invitation):
-        response = HttpResponseRedirect(reverse(self.home_view_name))
-        if not request.user.is_authenticated():
-            request.session[INVITE_SESSION_KEY] = invitation.pk
-            response = HttpResponseRedirect(self.get_registration_url())
-        return response
-
-    def confirm_invite_view(self, request, invitation):
-        response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
-        if request.user.is_authenticated():
-            self.model_class.objects.confirm(invitation, request.user)
-            request.session[INVITE_SESSION_KEY] = None
-        return response            
-
-    def invite_view(self, request):
+    def create_view(self, request):
         form_class = self.get_form_class()
         if form_class:
             form = form_class(request.POST) if request.method == 'POST' else form_class()
@@ -91,10 +73,44 @@ class InviteBackend(object):
             try:
                 invitations = self.send_invites(invitations, form, request)
                 request.session[SENT_INVITATIONS] = invitations
-                return HttpResponseRedirect(reverse('invites:invite-%s-confirm' % self.backend_name))
+                return HttpResponseRedirect(reverse('invites:invite-%s-processed' % self.backend_name))
             except InviteBackendException as e:
                 context['error'] = e
         return render_to_response([
-            'invites/%s/invite_form.html' % self.backend_name,
-            'invites/invite_form.html',
+            'invites/%s/create.html' % self.backend_name,
+            'invites/create.html',
             ], context, context_instance=RequestContext(request))
+
+    def processed_view(self, request):
+        invitations = request.session[SENT_INVITATIONS]
+        return render_to_response([
+            'invites/%s/processed.html'%self.backend_name,
+            'invites/processed.html',
+            ], {
+                'invitations':invitations,
+            }, context_instance=RequestContext(request))
+
+    def accept_view(self, request, username, invite_pk):
+        """
+            user hits this page from an invitation link, should be redirected
+            to the appropriate registration method
+        """
+        invitation = get_object_or_404(self.model_class, pk=int(invite_pk))
+        response = HttpResponseRedirect(reverse(self.home_view_name))
+        if not request.user.is_authenticated():
+            request.session[INVITE_SESSION_KEY] = invitation.pk
+            response = HttpResponseRedirect(self.get_registration_url())
+        return response
+
+    def fulfill_view(self, request):
+        """
+            after registering, a user should pass through this
+            view to actually generate a confirmed InvitationFulfillment
+        """
+        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
+        invitation = get_object_or_404(self.model_class, pk=int(invite_pk))
+        response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
+        if request.user.is_authenticated():
+            self.model_class.objects.fulfill(invitation, request.user)
+            request.session[INVITE_SESSION_KEY] = None
+        return response 

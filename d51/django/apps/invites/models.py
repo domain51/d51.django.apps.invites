@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
 class InvitationManager(models.Manager):
-    def confirm(self, invitation, user):
+    def fulfill(self, invitation, user):
         existing_fulfillments = invitation.fulfillments.filter(user=user, invitation=invitation)
         if not existing_fulfillments:
             return InvitationFulfillment.objects.create(
@@ -35,8 +35,15 @@ class Invitation(models.Model):
         from .sites import invite_site 
         return invite_site.load_backend_for(self)
 
+    def get_fulfillment_url(self):
+        from .sites import invite_site
+        backend = invite_site.load_backend_for(self)
+        return reverse('invites:invite-%s-fulfill'%backend.backend_name)
+
     def get_absolute_url(self):
-        return reverse('invites:invite-accept', kwargs={'username':'user-'+slugify(self.sent_by.get_full_name()), 'invite_pk':self.pk})
+        from .sites import invite_site
+        backend = invite_site.load_backend_for(self)
+        return reverse('invites:invite-%s-accept'%backend.backend_name, kwargs={'username':'user-'+slugify(self.sent_by.get_full_name()), 'invite_pk':self.pk})
 
 class InvitationFulfillment(models.Model):
     invitation = models.ForeignKey(Invitation, related_name='fulfillments')
