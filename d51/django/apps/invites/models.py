@@ -28,7 +28,7 @@ class Invitation(models.Model):
     objects = InvitationManager()
 
     def get_number_fulfilled(self):
-        return len(self.fulfillments.all())
+        return self.fulfillments.all().count()
     number_fulfilled = property(get_number_fulfilled)
 
     def get_backend(self):
