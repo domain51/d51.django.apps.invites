@@ -3,10 +3,10 @@ from django.conf import settings as django_settings
 from django.contrib.sites.models import Site
 from django.forms.fields import EmailField
 from .base import InviteBackend
-from ..sites import invite_site
 from dolt.apis.bitly import Bitly
 from dolt.apis.twitter import Twitter
 from d51.django.auth.twitter.utils import *
+from django.core.urlresolvers import reverse
 import oauth2
 
 class TwitterDMInvitationForm(forms.Form):
@@ -41,6 +41,10 @@ class TwitterInviteBackend(InviteBackend):
             bitly_link = shorten_invite_url(invite)
             self.dispatch_invite(twitter_api, invite, ' '.join([form.cleaned_data['message'], bitly_link]))
 
+    def get_registration_url(self):
+        import urllib
+        return '%s?%s' % (reverse(self.home_view_name), urllib.urlencode({'next':reverse('registration_activation_thanks')})) 
+
 class TwitterTweetInviteBackend(TwitterInviteBackend):
     def get_form_class(self):
         return TwitterTweetInvitationForm
@@ -65,6 +69,3 @@ class TwitterDMInviteBackend(TwitterInviteBackend):
 
     def accept_invite(self, request, invitation):
         pass
-
-invite_site.register_backend('twitter-dm', TwitterDMInviteBackend)
-invite_site.register_backend('twitter-tweet', TwitterTweetInviteBackend)

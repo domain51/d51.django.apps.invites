@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
 class InvitationManager(models.Manager):
-    def accept_invite(self, invitation, user):
+    def confirm(self, invitation, user):
         existing_fulfillments = invitation.fulfillments.filter(user=user, invitation=invitation)
         if not existing_fulfillments:
             return InvitationFulfillment.objects.create(
