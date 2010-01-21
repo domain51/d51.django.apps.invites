@@ -86,15 +86,25 @@ class InviteBackend(object):
         else:
             form = False
         context = { 'form': form }
-        if form and form.is_valid() and request.method == 'POST':
-            invitations = self.create_invitations_from_form(request.user, form)
-            try:
-                invitations = self.send_invites(invitations, form, request)
-                request.session[SENT_INVITATIONS] = invitations
-                return HttpResponseRedirect(reverse('invites:invite-%s-confirm' % self.backend_name))
-            except InviteBackendException as e:
-                context['error'] = e
+        if self.can_handle(request, with_form=form):
+            result = self.handle_invite_view(request, with_form=form, and_context=context)
+            if result:
+                return result
         return render_to_response([
             'invites/%s/invite_form.html' % self.backend_name,
             'invites/invite_form.html',
             ], context, context_instance=RequestContext(request))
+
+    def can_handle_invite_view(request, with_form=None):
+        form = with_form
+        return form and form.is_valid() and request.method == 'POST'
+
+    def handle_invite_view(request, with_form=None, and_context=None):
+        form, context = with_form, and_context
+        invitations = self.create_invitations_from_form(request.user, form)
+        try:
+            invitations = self.send_invites(invitations, form, request)
+            request.session[SENT_INVITATIONS] = invitations
+            return HttpResponseRedirect(reverse('invites:invite-%s-confirm' % self.backend_name))
+        except InviteBackendException as e:
+            context['error'] = e
