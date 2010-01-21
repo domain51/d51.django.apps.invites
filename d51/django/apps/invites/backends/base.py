@@ -1,12 +1,12 @@
-from d51.django.auth.decorators import auth_required
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from ..utils import INVITE_SESSION_KEY, SENT_INVITATIONS, InviteBackendException
+from django.conf.urls.defaults import patterns, url
+from django.utils.importlib import import_module
 from django.conf.urls.defaults import patterns, url
 from django.shortcuts import render_to_response, get_object_or_404
-from ..models import Invitation
-from ..sites import invite_site
-from ..utils import INVITE_SESSION_KEY, SENT_INVITATIONS, InviteBackendException
+from django.template import RequestContext
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from d51.django.auth.decorators import auth_required
 
 class InviteBackend(object):
     def __init__(self, backend_name, site):
@@ -42,9 +42,16 @@ class InviteBackend(object):
     def message_user(self, user, message):
         pass
 
+    def get_registration_url(self):
+        return reverse('registration_register')
+
     def model_class(self):
         return self._site.model_class
     model_class = property(model_class)
+
+    def home_view_name(self):
+        return self._site.home_view_name
+    home_view_name = property(home_view_name)
 
     def revoke_invitations(self, invitations):
         [invitation.delete() for invitation in invitations]
@@ -59,11 +66,18 @@ class InviteBackend(object):
             }, context_instance=RequestContext(request))
 
     def accept_invite_view(self, request, invitation):
+        response = HttpResponseRedirect(reverse(self.home_view_name))
+        if not request.user.is_authenticated():
+            request.session[INVITE_SESSION_KEY] = invitation.pk
+            response = HttpResponseRedirect(self.get_registration_url())
+        return response
+
+    def confirm_invite_view(self, request, invitation):
+        response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
         if request.user.is_authenticated():
-            self.model_class.objects.accept_invite(invitation, request.user)
-            return HttpResponseRedirect(request.GET.get('next', '/'))
-        else:
-            raise Exception('not yet implemented')
+            self.model_class.objects.confirm(invitation, request.user)
+            request.session[INVITE_SESSION_KEY] = None
+        return response            
 
     def invite_view(self, request):
         form_class = self.get_form_class()
