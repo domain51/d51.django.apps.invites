@@ -88,3 +88,9 @@ def generate_invite_site(with_backends=[], *args, **kwargs):
         target = getattr(module, target)
         invite_site.register_backend(name, target)
     return invite_site
+
+invite_site = None
+
+def set_invite_site(site):
+    global invite_site
+    invite_site = site

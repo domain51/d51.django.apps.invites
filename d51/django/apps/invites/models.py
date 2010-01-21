@@ -32,7 +32,7 @@ class Invitation(models.Model):
     number_fulfilled = property(get_number_fulfilled)
 
     def get_backend(self):
-        from .backends import invite_site 
+        from .sites import invite_site 
         return invite_site.load_backend_for(self)
 
     def get_absolute_url(self):
