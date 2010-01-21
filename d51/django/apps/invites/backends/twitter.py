@@ -54,9 +54,6 @@ class TwitterTweetInviteBackend(TwitterInviteBackend):
             'status':message,
         })
 
-    def accept_invite(self, request, invitation):
-        pass
-
 class TwitterDMInviteBackend(TwitterInviteBackend):
     def get_form_class(self):
         return TwitterDMInvitationForm
@@ -66,6 +63,3 @@ class TwitterDMInviteBackend(TwitterInviteBackend):
             'text':message,
             'screen_name': invite.target,
         })
-
-    def accept_invite(self, request, invitation):
-        pass

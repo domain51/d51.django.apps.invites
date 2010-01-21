@@ -2,6 +2,7 @@ from django import forms, template
 from django.contrib.sites.models import Site
 from django.forms.fields import EmailField
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from .base import InviteBackend
 
 def check(email):
@@ -57,16 +58,3 @@ class EmailInviteBackend(InviteBackend):
                 (invitation.target, )
             )
         return invitations
-
-    def accept_invite(self, request, invitation):
-        if request.user.is_authenticated():
-            return super(EmailInviteBackend, self).accept_invite(request, invitation)
-        else:
-            from django.contrib.auth.models import User
-            try:
-                user = User.objects.get(email=invitation.target)
-                self.model_class_objects.accept_invite(invitation, user)
-                return HttpResponseRedirect('/')
-            except User.DoesNotExist:
-                pass
-
