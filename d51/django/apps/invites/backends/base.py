@@ -107,10 +107,13 @@ class InviteBackend(object):
             after registering, a user should pass through this
             view to actually generate a confirmed InvitationFulfillment
         """
-        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
-        invitation = get_object_or_404(self.model_class, pk=int(invite_pk))
-        response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
         if request.user.is_authenticated():
-            self.model_class.objects.fulfill(invitation, request.user)
-            request.session[INVITE_SESSION_KEY] = None
+            self.fulfill_current_invitation(request)
+        response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
         return response 
+
+    def fulfill_current_invitation(self, request):
+        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
+        get_object_or_404(self.model_class, pk=int(invite_pk)).fulfill(request.user)
+        request.session[INVITE_SESSION_KEY] = None
+
