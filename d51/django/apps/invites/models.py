@@ -20,12 +20,26 @@ class InvitationManager(models.Manager):
                 'sent_by':user,
             }) for id in with_form.invite_ids]
 
+
+class Group(models.Model):
+    sent_by = models.ForeignKey(User, related_name="group_invitation")
+    backend = models.CharField(max_length=255)
+
+    def fulfill(self, target, user):
+        try:
+            invitation = self.invitations.get(target=target)
+            invitation.fulfill(user)
+            return True
+        except Invitation.DoesNotExist, e:
+            return False
+
 class Invitation(models.Model):
     sent_by = models.ForeignKey(User, related_name='invitations')
     backend = models.CharField(max_length=255)
     target = models.CharField(max_length=255)
     published = models.DateTimeField(auto_now_add=True)
     objects = InvitationManager()
+    group = models.ForeignKey(Group, related_name="invitations", blank=True, null=True)
 
     def get_number_fulfilled(self):
         return self.fulfillments.all().count()
@@ -37,6 +51,12 @@ class Invitation(models.Model):
 
     def get_absolute_url(self):
         return reverse('invites:invite-accept', kwargs={'username':'user-'+slugify(self.sent_by.get_full_name()), 'invite_pk':self.pk})
+
+    def fulfill(self, user):
+        InvitationFulfillment.objects.get_or_create(
+            invitation=self,
+            user=user
+        )
 
 class InvitationFulfillment(models.Model):
     invitation = models.ForeignKey(Invitation, related_name='fulfillments')

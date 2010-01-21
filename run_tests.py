@@ -7,6 +7,8 @@ def main():
     settings = {
         "INSTALLED_APPS": (
             "d51.django.apps.invites",
+            "django.contrib.auth",
+            "django.contrib.contenttypes",
         ),
     }
     run_tests(settings, 'invites')
