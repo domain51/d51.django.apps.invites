@@ -88,9 +88,13 @@ class InviteBackend(object):
         try:
             invitations = self.send_invites(invitations, form, request)
             request.session[SENT_INVITATIONS] = invitations
-            return HttpResponseRedirect(reverse('invites:invite-%s-processed' % self.backend_name))
+            return self.successful_create_redirect
         except InviteBackendException as e:
             context['error'] = e
+
+    @property
+    def successful_create_redirect(self):
+        return redirect('invites:invite-%s-processed' % self.backend_name)
 
     def processed_view(self, request):
         invitations = request.session[SENT_INVITATIONS]
