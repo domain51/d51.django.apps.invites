@@ -23,7 +23,7 @@ class TwitterTweetInvitationForm(forms.Form):
 
 def shorten_invite_url(invite, settings=django_settings):
     bitly_api = Bitly(login=settings.BITLY_LOGIN, apiKey=settings.BITLY_API_KEY)
-    url = 'http://%s%s' % (Site.objects.get_current().domain, invite.get_absolute_url())
+    url = invite.get_absolute_url()
     results = bitly_api.shorten(longUrl=url)
     shortened_url = url 
     if results['statusCode'] != 'ERROR':

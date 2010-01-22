@@ -28,6 +28,9 @@ class Group(models.Model):
         except Invitation.DoesNotExist, e:
             return False
 
+    def get_absolute_url(self):
+        return utils.get_absolute_url_for(self)
+
 class Invitation(models.Model):
     sent_by = models.ForeignKey(User, related_name='invitations')
     backend = models.CharField(max_length=255)
@@ -50,9 +53,7 @@ class Invitation(models.Model):
         return reverse('invites:invite-%s-fulfill'%backend.backend_name)
 
     def get_absolute_url(self):
-        from .sites import invite_site
-        backend = invite_site.load_backend_for(self)
-        return reverse('invites:invite-%s-accept'%backend.backend_name, kwargs={'username':'user-'+slugify(self.sent_by.get_full_name()), 'invite_pk':self.pk})
+        return utils.get_absolute_url_for(self)
 
     def fulfill(self, user):
         InvitationFulfillment.objects.get_or_create(
