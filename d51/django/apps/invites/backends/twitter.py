@@ -41,10 +41,6 @@ class TwitterInviteBackend(InviteBackend):
             bitly_link = shorten_invite_url(invite)
             self.dispatch_invite(twitter_api, invite, ' '.join([form.cleaned_data['message'], bitly_link]))
 
-    def get_registration_url(self):
-        import urllib
-        return '%s?%s' % (reverse(self.home_view_name), urllib.urlencode({'next':reverse('registration_activation_thanks')})) 
-
 class TwitterTweetInviteBackend(TwitterInviteBackend):
     def get_form_class(self):
         return TwitterTweetInvitationForm

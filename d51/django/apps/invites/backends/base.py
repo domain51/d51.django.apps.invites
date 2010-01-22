@@ -2,11 +2,12 @@ from ..utils import INVITE_SESSION_KEY, SENT_INVITATIONS, InviteBackendException
 from django.conf.urls.defaults import patterns, url
 from django.utils.importlib import import_module
 from django.conf.urls.defaults import patterns, url
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from d51.django.auth.decorators import auth_required
+from d51.django.apps.invites import models
 
 class InviteBackend(object):
     def __init__(self, backend_name, site):
@@ -51,7 +52,8 @@ class InviteBackend(object):
         return invitations 
 
     def get_registration_url(self):
-        return reverse('registration_register')
+        import urllib
+        return '%s?%s' % (reverse(self.home_view_name), urllib.urlencode({'next':reverse('registration_activation_thanks')})) 
 
     def model_class(self):
         return self._site.model_class
@@ -61,13 +63,14 @@ class InviteBackend(object):
         return self._site.home_view_name
     home_view_name = property(home_view_name)
 
-    def create_view(self, request):
+    def create_view(self, request, extra_context={}):
         form_class = self.get_form_class()
         if form_class:
             form = form_class(request.POST) if request.method == 'POST' else form_class()
         else:
             form = False
-        context = { 'form': form }
+        context = extra_context
+        context['form'] = form
         if self.can_handle_create_for(request, with_form=form):
             response = self.handle_create_for(request, with_form=form, and_context=context)
             if response:
@@ -113,7 +116,7 @@ class InviteBackend(object):
         invitation = get_object_or_404(self.model_class, pk=int(invite_pk))
         response = HttpResponseRedirect(reverse(self.home_view_name))
         if not request.user.is_authenticated():
-            request.session[INVITE_SESSION_KEY] = invitation.pk
+            request.session[INVITE_SESSION_KEY] = invitation
             response = HttpResponseRedirect(self.get_registration_url())
         return response
 
@@ -124,11 +127,15 @@ class InviteBackend(object):
         """
         if request.user.is_authenticated():
             self.fulfill_current_invitation(request)
+            request.session[INVITE_SESSION_KEY] = None
         response = HttpResponseRedirect(request.GET.get('next', reverse(self.home_view_name)))
         return response 
 
     def fulfill_current_invitation(self, request):
-        invite_pk = request.session.get(INVITE_SESSION_KEY, None)
-        get_object_or_404(self.model_class, pk=int(invite_pk)).fulfill(request.user)
-        request.session[INVITE_SESSION_KEY] = None
+        invitation = self.fetch_current_invitation_object(request)
+        if invitation:
+            invitation.fulfill(request.user)
+
+    def fetch_current_invitation_object(self, request):
+        return request.session[INVITE_SESSION_KEY]
 

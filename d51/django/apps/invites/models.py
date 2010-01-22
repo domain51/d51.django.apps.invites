@@ -1,7 +1,7 @@
+from d51.django.apps.invites import utils
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse 
-from django.template.defaultfilters import slugify
 
 class InvitationManager(models.Manager):
     def fulfill(self, invitation, user):
@@ -27,6 +27,11 @@ class Group(models.Model):
             return True
         except Invitation.DoesNotExist, e:
             return False
+
+    def get_fulfillment_url(self):
+        from .sites import invite_site
+        backend = invite_site.load_backend_for(self)
+        return reverse('invites:invite-%s-fulfill'%backend.backend_name)
 
     def get_absolute_url(self):
         return utils.get_absolute_url_for(self)
@@ -56,10 +61,11 @@ class Invitation(models.Model):
         return utils.get_absolute_url_for(self)
 
     def fulfill(self, user):
-        InvitationFulfillment.objects.get_or_create(
-            invitation=self,
-            user=user
-        )
+        if not InvitationFulfillment.objects.filter(user=user).count():
+            InvitationFulfillment.objects.get_or_create(
+                invitation=self,
+                user=user
+            )
 
 class InvitationFulfillment(models.Model):
     invitation = models.ForeignKey(Invitation, related_name='fulfillments')

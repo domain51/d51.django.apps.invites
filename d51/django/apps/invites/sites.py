@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from .models import Invitation
-from .utils import INVITE_SESSION_KEY, InviteBackendException
+from .utils import InviteBackendException
 from d51.django.auth.decorators import auth_required
 
 class InviteBackendSite(object):

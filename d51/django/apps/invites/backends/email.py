@@ -46,7 +46,7 @@ class EmailInviteBackend(InviteBackend):
         for invitation in invitations:
             context = template.Context({
                 'invitation': invitation,
-                'url': 'http://%s%s' % (Site.objects.get_current().domain, invitation.get_absolute_url()),
+                'url': invitation.get_absolute_url(),
                 'note': form.cleaned_data['personal_note'],
             })
             subject_template = template.loader.get_template('invites/emails/subject.txt')
