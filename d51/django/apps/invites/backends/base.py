@@ -78,11 +78,11 @@ class InviteBackend(object):
             'invites/create.html',
             ], context, context_instance=RequestContext(request))
 
-    def can_handle_create_for(request, with_form=None):
+    def can_handle_create_for(self, request, with_form=None):
         form = with_form
         return form and form.is_valid() and request.method == 'POST'
 
-    def handle_create_for(request, with_form, and_context):
+    def handle_create_for(self, request, with_form, and_context):
         form, context = with_form, and_context
         invitations = self.create_invitations_from_form(request.user, form)
         try:
