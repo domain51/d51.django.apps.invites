@@ -1,2 +1,2 @@
 Join me at this excellent Facebook application!
-<fb:req-choice url='#TODO' label='Excellent App!'></fb:req-choice>
+<fb:req-choice url='{{ group.get_absolute_url }}' label='Excellent App!'></fb:req-choice>
