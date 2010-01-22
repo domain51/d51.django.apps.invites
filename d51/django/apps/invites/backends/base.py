@@ -69,7 +69,7 @@ class InviteBackend(object):
             form = False
         context = { 'form': form }
         if self.can_handle_create_for(request, with_form=form):
-            response = self.handle_create_for(reqeuest, with_form=form, and_context=context)
+            response = self.handle_create_for(request, with_form=form, and_context=context)
             if response:
                 return response
 
