@@ -44,10 +44,16 @@ class Backend(InviteBackend):
 
     def fulfill_current_invitation(self, request):
         # TODO: should only work if user is FB user
+        group = self.fetch_current_invitation_object(request)
         if hasattr(request.user, 'facebook'):
-            group = self.fetch_current_invitation_object(request)
             group.fulfill(request.user.facebook.uid, request.user)
-
+        else:
+            invitation = group.invitations.create(
+                                            sent_by=group.sent_by,
+                                            backend=group.backend,
+                                            target='nogroup-%d'%user.pk,
+            )
+            invitation.fulfill(request.user)
 
     def get_registration_url(self):
         # TODO: refactor into common super-class
